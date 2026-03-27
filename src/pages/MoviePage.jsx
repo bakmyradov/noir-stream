@@ -45,9 +45,8 @@ export default function MoviePage() {
               key={`${id}-${sourceId}`}
               src={embedUrl}
               allowFullScreen
-              referrerPolicy="no-referrer"
+              referrerPolicy="origin"
               scrolling="no"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen"
               title={movie.title}
             />
           </div>
