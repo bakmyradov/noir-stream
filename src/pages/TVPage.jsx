@@ -70,8 +70,9 @@ export default function TVPage() {
               key={`${id}-${activeEp.season}-${activeEp.episode}-${sourceId}`}
               src={embedUrl}
               allowFullScreen
-              referrerPolicy="origin"
+              referrerPolicy="no-referrer"
               scrolling="no"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen"
               title={`${show.name} S${activeEp.season}E${activeEp.episode}`}
             />
           </div>
