@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Dark background -->
+  <rect width="400" height="400" fill="#0d0d0d" rx="60"/>
+  <!-- Thin border inset -->
+  <rect x="24" y="24" width="352" height="352" fill="none" stroke="#2a2a2a" stroke-width="1" rx="44"/>
+  <!-- NOIR text -->
+  <text
+    x="200" y="228"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="108"
+    font-weight="400"
+    letter-spacing="6"
+    fill="white"
+    text-anchor="middle"
+    font-style="italic"
+  >Noir</text>
+</svg>
