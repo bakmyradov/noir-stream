@@ -31,3 +31,8 @@ export async function getTVShow(id) {
 export async function getSeason(tvId, seasonNum) {
   return get(`/tv/${tvId}/season/${seasonNum}`)
 }
+
+export async function getTrending() {
+  const data = await get('/trending/all/week?language=en-US')
+  return (data.results || []).filter(r => r.media_type === 'movie' || r.media_type === 'tv').slice(0, 5)
+}

@@ -44,13 +44,18 @@ export default function SearchBar({ autoFocus = false }) {
 
   return (
     <div className="searchbar-wrapper" ref={wrapperRef}>
+      <div className="search-icon">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M6.5 1a5.5 5.5 0 100 11 5.5 5.5 0 000-11zm-7 5.5a7 7 0 1112.53 4.394l3.538 3.539a1 1 0 11-1.414 1.414l-3.539-3.538A7 7 0 01-.5 6.5z"/>
+        </svg>
+      </div>
       <input
         type="text"
         className="searchbar-input"
         value={query}
         autoFocus={autoFocus}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search movies or TV shows..."
+        placeholder="Search films &amp; series..."
         autoComplete="off"
       />
       {loading && <span className="search-spinner" />}
