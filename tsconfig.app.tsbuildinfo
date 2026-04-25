@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/api.ts","./src/main.tsx","./src/sources.ts","./src/sw.ts","./src/types.ts","./src/components/logomark.tsx","./src/components/searchbar.tsx","./src/components/sourceselector.tsx","./src/components/topbar.tsx","./src/hooks/useembedfallback.ts","./src/pages/home.tsx","./src/pages/moviepage.tsx","./src/pages/tvpage.tsx"],"version":"6.0.3"}

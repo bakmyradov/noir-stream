@@ -1,4 +1,9 @@
-export default function LogoMark({ style = 'aperture', size = 44 }) {
+interface LogoMarkProps {
+  style?: 'aperture' | 'frame' | 'minimal'
+  size?: number
+}
+
+export default function LogoMark({ style = 'aperture', size = 44 }: LogoMarkProps) {
   if (style === 'frame') {
     return (
       <svg width={size} height={Math.round(size * 0.72)} viewBox="0 0 44 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,7 +30,6 @@ export default function LogoMark({ style = 'aperture', size = 44 }) {
     )
   }
 
-  // aperture (default) — film iris with N letterform
   return (
     <svg width={size} height={size} viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="22" cy="22" r="21" stroke="currentColor" strokeWidth="0.8" strokeOpacity="0.3"/>

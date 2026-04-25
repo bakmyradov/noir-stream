@@ -1,57 +1,146 @@
-:root {
-  --bg: #080810;
-  --bg2: #0e0e18;
-  --bg3: #14141f;
-  --fg: #f0ede8;
-  --fg-muted: rgba(240,237,232,0.45);
-  --fg-dim: rgba(240,237,232,0.2);
-  --accent: oklch(0.78 0.10 72);
-  --accent2: oklch(0.55 0.10 72);
-  --accent-glow: oklch(0.78 0.10 72 / 0.18);
+@import "tailwindcss";
 
-  --sans: 'DM Sans', system-ui, sans-serif;
-  --heading: 'Cormorant Garamond', Georgia, serif;
+/* ─── Design tokens — exposed as Tailwind utilities ───
+   `--color-accent` becomes `text-accent`, `bg-accent`, `border-accent`, etc.
+   `--font-heading` becomes `font-heading`. Custom breakpoints, animations,
+   and keyframes are all wired through `@theme`. */
+@theme {
+  --color-bg: #080810;
+  --color-bg2: #0e0e18;
+  --color-bg3: #14141f;
+  --color-fg: #f0ede8;
+  --color-fg-muted: rgba(240, 237, 232, 0.45);
+  --color-fg-dim: rgba(240, 237, 232, 0.2);
+  --color-accent: oklch(0.78 0.10 72);
+  --color-accent2: oklch(0.55 0.10 72);
 
-  font: 14px/1.6 var(--sans);
-  font-weight: 300;
-  color-scheme: dark;
-  color: var(--fg);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+
+  --animate-fade-up: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-fade-in: fadeIn 0.6s ease both;
+  --animate-spin-slow: spin 0.6s linear infinite;
+  --animate-underline-grow: underlineGrow 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes underlineGrow {
+    from { width: 0; opacity: 0; }
+    to   { width: 100%; opacity: 1; }
+  }
+  @keyframes spin {
+    to { transform: translateY(-50%) rotate(360deg); }
+  }
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Global resets and base typography. Kept in CSS because Tailwind's
+   `@layer base` is the right home for these — they apply to every element. */
+@layer base {
+  :root {
+    font: 14px/1.6 var(--font-sans);
+    font-weight: 300;
+    color-scheme: dark;
+    color: var(--color-fg);
+    background: var(--color-bg);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    overflow-x: hidden;
+  }
+
+  /* Film grain overlay — pure CSS effect, no equivalent Tailwind utility. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100svh;
+  }
+
+  h1, h2 {
+    font-family: var(--font-heading);
+    color: var(--color-fg);
+  }
 }
 
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--fg);
-  overflow-x: hidden;
-}
-
-/* Film grain overlay */
-body::before {
-  content: '';
-  position: fixed;
+/* Component-level CSS that is awkward to express as utilities:
+   - The episode-card play indicator uses two pseudo-elements (disc + triangle)
+     and four interaction states. Encoding all of that with Tailwind variants
+     would be more cryptic than just keeping the rule. */
+.ep-play-icon {
+  position: absolute;
   inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.35;
-  mix-blend-mode: overlay;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.55) 100%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
-#root {
-  width: 100%;
-  min-height: 100svh;
+.ep-play-icon::before {
+  content: '';
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transform: scale(0.85);
+  transition: transform 0.25s ease, background-color 0.25s ease;
 }
 
-p { margin: 0; }
-h1, h2 { font-family: var(--heading); color: var(--fg); }
+.ep-play-icon::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 8px 0 8px 13px;
+  border-color: transparent transparent transparent #0a0a0f;
+  margin-left: 3px;
+}
+
+.episode-card:hover .ep-play-icon,
+.episode-card.is-active .ep-play-icon {
+  opacity: 1;
+}
+
+.episode-card:hover .ep-play-icon::before {
+  transform: scale(1);
+}
+
+.episode-card.is-active .ep-play-icon::before {
+  background: var(--color-accent2);
+  transform: scale(1);
+}

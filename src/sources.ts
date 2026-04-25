@@ -1,4 +1,6 @@
-export const SOURCES = [
+import type { Source } from './types'
+
+export const SOURCES: readonly Source[] = [
   {
     id: 'videasy',
     name: 'Videasy',
@@ -37,3 +39,13 @@ export const SOURCES = [
 ]
 
 export const DEFAULT_SOURCE = 'videasy'
+
+// Origins of the player iframes — used by the SW to scope its cross-origin
+// navigation block so it only fires for redirects coming from a player iframe.
+export const SOURCE_ORIGINS: readonly string[] = [
+  'https://player.videasy.net',
+  'https://vidfast.pro',
+  'https://vidsrc.cc',
+  'https://vidlink.pro',
+  'https://multiembed.mov',
+]
