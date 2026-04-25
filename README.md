@@ -1,3 +1,5 @@
+<img width="5088" height="3664" alt="Noir" src="https://github.com/user-attachments/assets/0d6fb68a-f050-4918-8001-dec874ddeb41" />
+
 # Noir
 
 A dark, cinematic streaming front-end for movies and TV shows. Search any title, pick from multiple embed providers, and watch — installable as a PWA with a built-in ad-redirect blocker.
