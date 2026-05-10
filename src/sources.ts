@@ -19,8 +19,8 @@ export const SOURCES: readonly Source[] = [
     id: 'vidsrc',
     name: 'VidSrc',
     badge: '1080p',
-    movie: (id) => `https://vidsrc.cc/v2/embed/movie/${id}`,
-    tv: (id, s, e) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+    movie: (id) => `https://vidsrc-embed.ru/embed/movie?tmdb=${id}`,
+    tv: (id, s, e) => `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
   {
     id: 'vidlink',
@@ -45,7 +45,7 @@ export const DEFAULT_SOURCE = 'videasy'
 export const SOURCE_ORIGINS: readonly string[] = [
   'https://player.videasy.net',
   'https://vidfast.pro',
-  'https://vidsrc.cc',
+  'https://vidsrc-embed.ru',
   'https://vidlink.pro',
   'https://multiembed.mov',
 ]

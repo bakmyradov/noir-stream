@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getMovie, IMG } from '../api'
 import Topbar from '../components/Topbar'
 import SourceSelector from '../components/SourceSelector'
+import DetailHero from '../components/DetailHero'
 import { DEFAULT_SOURCE } from '../sources'
 import { useEmbedFallback } from '../hooks/useEmbedFallback'
 import type { MovieDetails } from '../types'
@@ -19,6 +20,7 @@ export default function MoviePage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPlaying(false)
     setMovie(null)
+    setSourceId(DEFAULT_SOURCE)
     const controller = new AbortController()
     getMovie(id, controller.signal)
       .then(setMovie)
@@ -29,7 +31,7 @@ export default function MoviePage() {
     return () => controller.abort()
   }, [id, navigate])
 
-  const { source, onIframeLoad, onIframeError, reset } = useEmbedFallback(
+  const { source, remaining, total, onIframeLoad, onIframeError, reset } = useEmbedFallback(
     sourceId,
     setSourceId,
     `movie-${id}`,
@@ -52,31 +54,18 @@ export default function MoviePage() {
     <div className="min-h-svh bg-bg animate-fade-in">
       <Topbar />
 
-      {!playing && (
-        <div className="relative h-[520px] overflow-hidden max-[600px]:h-[340px]">
-          <div className="absolute inset-0 bg-linear-to-br from-[#0d1a2a] via-[#1a0d0d] to-[#0d0d1a]">
-            {movie.backdrop_path && (
-              <img
-                src={IMG.backdrop(movie.backdrop_path) ?? undefined}
-                alt=""
-                className="absolute inset-0 size-full object-cover opacity-25 saturate-[0.6]"
-              />
-            )}
-          </div>
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(8,8,16,0.85)_0%,rgba(8,8,16,0.3)_50%,transparent_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,8,16,0.15)_0%,rgba(8,8,16,0)_30%,rgba(8,8,16,0.6)_70%,rgba(8,8,16,1)_100%)]" />
-        </div>
-      )}
+      {!playing && <DetailHero backdropPath={movie.backdrop_path} />}
 
       {playing && (
         <>
-          <div className="w-full aspect-video bg-black">
+          <div className="w-full aspect-video bg-black overflow-hidden">
+            {/* Cross-origin iframes don't reliably emit `error`; the watchdog
+                inside useEmbedFallback is the primary fallback path. */}
             <iframe
               key={`${id}-${sourceId}`}
               src={embedUrl}
               allowFullScreen
               referrerPolicy="no-referrer"
-              scrolling="no"
               title={movie.title}
               onLoad={onIframeLoad}
               onError={onIframeError}
@@ -85,6 +74,8 @@ export default function MoviePage() {
           </div>
           <SourceSelector
             active={sourceId}
+            remaining={remaining}
+            total={total}
             onChange={(id) => { setSourceId(id); reset() }}
           />
         </>

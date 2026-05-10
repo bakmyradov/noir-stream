@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getTVShow, getSeason, IMG } from '../api'
 import Topbar from '../components/Topbar'
 import SourceSelector from '../components/SourceSelector'
+import DetailHero from '../components/DetailHero'
 import { DEFAULT_SOURCE } from '../sources'
 import { useEmbedFallback } from '../hooks/useEmbedFallback'
 import type { ActiveEpisode, Episode, SeasonSummary, TVDetails } from '../types'
@@ -16,6 +17,8 @@ export default function TVPage() {
   const [episodes, setEpisodes] = useState<Episode[]>([])
   const [activeEp, setActiveEp] = useState<ActiveEpisode | null>(null)
   const [loadingEps, setLoadingEps] = useState(false)
+  const [episodesError, setEpisodesError] = useState(false)
+  const [episodesRetry, setEpisodesRetry] = useState(0)
   const [sourceId, setSourceId] = useState(DEFAULT_SOURCE)
 
   useEffect(() => {
@@ -23,6 +26,7 @@ export default function TVPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveEp(null)
     setShow(null)
+    setSourceId(DEFAULT_SOURCE)
     const controller = new AbortController()
     getTVShow(id, controller.signal)
       .then((data) => {
@@ -42,16 +46,18 @@ export default function TVPage() {
     if (!id || !activeSeason) return
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoadingEps(true)
+    setEpisodesError(false)
     const controller = new AbortController()
     getSeason(id, activeSeason, controller.signal)
       .then((data) => setEpisodes(data.episodes ?? []))
       .catch((e) => {
         if ((e as Error).name === 'AbortError') return
         setEpisodes([])
+        setEpisodesError(true)
       })
       .finally(() => setLoadingEps(false))
     return () => controller.abort()
-  }, [id, activeSeason])
+  }, [id, activeSeason, episodesRetry])
 
   function playEpisode(ep: Episode) {
     setActiveEp({ season: ep.season_number, episode: ep.episode_number, name: ep.name })
@@ -59,7 +65,7 @@ export default function TVPage() {
   }
 
   const embedKey = activeEp ? `tv-${id}-${activeEp.season}-${activeEp.episode}` : `tv-${id}-idle`
-  const { source, onIframeLoad, onIframeError, reset } = useEmbedFallback(
+  const { source, remaining, total, onIframeLoad, onIframeError, reset } = useEmbedFallback(
     sourceId,
     setSourceId,
     embedKey,
@@ -82,31 +88,18 @@ export default function TVPage() {
     <div className="min-h-svh bg-bg animate-fade-in">
       <Topbar />
 
-      {!activeEp && (
-        <div className="relative h-[520px] overflow-hidden max-[600px]:h-[340px]">
-          <div className="absolute inset-0 bg-linear-to-br from-[#0d1a2a] via-[#1a0d0d] to-[#0d0d1a]">
-            {show.backdrop_path && (
-              <img
-                src={IMG.backdrop(show.backdrop_path) ?? undefined}
-                alt=""
-                className="absolute inset-0 size-full object-cover opacity-25 saturate-[0.6]"
-              />
-            )}
-          </div>
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(8,8,16,0.85)_0%,rgba(8,8,16,0.3)_50%,transparent_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,8,16,0.15)_0%,rgba(8,8,16,0)_30%,rgba(8,8,16,0.6)_70%,rgba(8,8,16,1)_100%)]" />
-        </div>
-      )}
+      {!activeEp && <DetailHero backdropPath={show.backdrop_path} />}
 
       {activeEp && embedUrl && (
         <>
-          <div className="w-full aspect-video bg-black">
+          <div className="w-full aspect-video bg-black overflow-hidden">
+            {/* Cross-origin iframes don't reliably emit `error`; the watchdog
+                inside useEmbedFallback is the primary fallback path. */}
             <iframe
               key={`${id}-${activeEp.season}-${activeEp.episode}-${sourceId}`}
               src={embedUrl}
               allowFullScreen
               referrerPolicy="no-referrer"
-              scrolling="no"
               title={`${show.name} S${activeEp.season}E${activeEp.episode}`}
               onLoad={onIframeLoad}
               onError={onIframeError}
@@ -115,6 +108,8 @@ export default function TVPage() {
           </div>
           <SourceSelector
             active={sourceId}
+            remaining={remaining}
+            total={total}
             onChange={(id) => { setSourceId(id); reset() }}
           />
         </>
@@ -197,6 +192,16 @@ export default function TVPage() {
           <div className="text-fg-muted py-6 text-center text-[13px] tracking-[0.04em]">
             Loading episodes…
           </div>
+        ) : episodesError ? (
+          <div className="text-fg-muted py-6 text-center text-[13px] tracking-[0.04em]">
+            Failed to load episodes.{' '}
+            <button
+              onClick={() => setEpisodesRetry((n) => n + 1)}
+              className="text-accent underline-offset-2 hover:underline cursor-pointer bg-transparent border-none p-0 font-inherit"
+            >
+              Try again
+            </button>
+          </div>
         ) : (
           <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(200px,1fr))] max-[600px]:grid-cols-[repeat(auto-fill,minmax(150px,1fr))]">
             {episodes.map((ep) => {
@@ -205,10 +210,11 @@ export default function TVPage() {
                 activeEp?.episode === ep.episode_number
               const still = IMG.still(ep.still_path)
               return (
-                <div
+                <button
                   key={ep.id}
+                  type="button"
                   onClick={() => playEpisode(ep)}
-                  className={`episode-card relative cursor-pointer rounded-[2px] overflow-hidden bg-bg2 border transition-[border-color,transform,box-shadow] duration-250 hover:translate-y-[-3px] hover:border-white/10 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)] ${
+                  className={`episode-card text-left relative cursor-pointer rounded-[2px] overflow-hidden bg-bg2 border transition-[border-color,transform,box-shadow] duration-250 hover:translate-y-[-3px] hover:border-white/10 hover:shadow-[0_12px_40px_rgba(0,0,0,0.5)] focus-visible:outline-none focus-visible:border-accent ${
                     isActive
                       ? 'is-active border-accent2 shadow-[0_0_0_1px_var(--color-accent2)]'
                       : 'border-white/4'
@@ -237,7 +243,7 @@ export default function TVPage() {
                       <span className="text-[11px] text-fg-muted font-light">{ep.runtime} min</span>
                     )}
                   </div>
-                </div>
+                </button>
               )
             })}
           </div>

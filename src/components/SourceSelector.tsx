@@ -3,9 +3,15 @@ import { SOURCES } from '../sources'
 interface SourceSelectorProps {
   active: string
   onChange: (id: string) => void
+  /** Remaining sources in the auto-fallback chain. When less than `total`, the
+   *  selector shows how many fallbacks have been tried so far. */
+  remaining?: number
+  total?: number
 }
 
-export default function SourceSelector({ active, onChange }: SourceSelectorProps) {
+export default function SourceSelector({ active, onChange, remaining, total }: SourceSelectorProps) {
+  const tried = total !== undefined && remaining !== undefined ? total - remaining : 0
+  const showStatus = total !== undefined && tried > 1
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-12 py-2.5 bg-bg2 border-b border-white/5 max-[600px]:px-5">
       <span className="text-[9px] uppercase tracking-[0.15em] text-fg-muted mr-1.5 shrink-0">
@@ -35,6 +41,15 @@ export default function SourceSelector({ active, onChange }: SourceSelectorProps
           </button>
         )
       })}
+      {showStatus && (
+        <span
+          role="status"
+          aria-live="polite"
+          className="ml-auto text-[10px] tracking-[0.1em] uppercase text-fg-muted"
+        >
+          Trying source {tried} / {total}
+        </span>
+      )}
     </div>
   )
 }

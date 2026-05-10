@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { searchMulti, IMG } from '../api'
+import { searchMulti, IMG, TMDB_KEY_PRESENT } from '../api'
 import type { MediaSummary } from '../types'
+
+const MIN_QUERY_LENGTH = 2
 
 interface SearchBarProps {
   autoFocus?: boolean
@@ -15,15 +17,25 @@ export default function SearchBar({ autoFocus = false, variant = 'hero' }: Searc
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const [open, setOpen] = useState(false)
+  const [highlight, setHighlight] = useState(0)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
     const q = query.trim()
-    if (!q) {
+    if (q.length < MIN_QUERY_LENGTH) {
       setResults([])
       setOpen(false)
       setError(false)
+      setLoading(false)
+      return
+    }
+
+    if (!TMDB_KEY_PRESENT) {
+      setResults([])
+      setError(true)
+      setOpen(true)
       return
     }
 
@@ -34,6 +46,7 @@ export default function SearchBar({ autoFocus = false, variant = 'hero' }: Searc
       try {
         const items = await searchMulti(q, controller.signal)
         setResults(items)
+        setHighlight(0)
         setOpen(true)
       } catch (e) {
         if ((e as Error).name === 'AbortError') return
@@ -67,6 +80,26 @@ export default function SearchBar({ autoFocus = false, variant = 'hero' }: Searc
     navigate(`/${item.media_type}/${item.id}`)
   }
 
+  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Escape') {
+      setOpen(false)
+      inputRef.current?.blur()
+      return
+    }
+    if (!open || results.length === 0) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHighlight((h) => (h + 1) % results.length)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlight((h) => (h - 1 + results.length) % results.length)
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      const item = results[highlight]
+      if (item) select(item)
+    }
+  }
+
   const isTopbar = variant === 'topbar'
   const wrapperClasses = isTopbar
     ? 'relative w-full max-w-[360px] flex-1 z-[100]'
@@ -74,6 +107,8 @@ export default function SearchBar({ autoFocus = false, variant = 'hero' }: Searc
 
   const iconLeft = isTopbar ? 'left-2.5' : 'left-[18px]'
   const inputPad = isTopbar ? 'py-2 pl-9 pr-3.5 text-[13px]' : 'py-3.5 pl-12 pr-5 text-sm'
+
+  const listboxId = 'search-results-listbox'
 
   return (
     <div className={wrapperClasses} ref={wrapperRef}>
@@ -83,12 +118,19 @@ export default function SearchBar({ autoFocus = false, variant = 'hero' }: Searc
         </svg>
       </div>
       <input
+        ref={inputRef}
         type="text"
         value={query}
         autoFocus={autoFocus}
         onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder="Search films & series..."
         autoComplete="off"
+        role="combobox"
+        aria-expanded={open}
+        aria-controls={listboxId}
+        aria-autocomplete="list"
+        aria-activedescendant={open && results[highlight] ? `search-result-${results[highlight].id}` : undefined}
         className={`w-full bg-white/5 border border-white/10 rounded-[3px] text-fg font-sans font-light tracking-[0.02em] outline-none transition-[border-color,background,box-shadow] duration-300 placeholder:text-fg-muted focus:border-accent/40 focus:bg-white/8 focus:shadow-[0_0_0_1px_rgba(200,170,100,0.12),0_8px_32px_rgba(0,0,0,0.4)] ${inputPad}`}
       />
       {loading && (
@@ -96,17 +138,27 @@ export default function SearchBar({ autoFocus = false, variant = 'hero' }: Searc
       )}
 
       {open && (
-        <ul className="absolute top-[calc(100%+8px)] left-0 right-0 bg-[#12121d] border border-white/8 rounded-[3px] z-200 shadow-[0_24px_60px_rgba(0,0,0,0.7)] overflow-hidden animate-fade-up [animation-duration:0.2s] list-none">
+        <ul
+          id={listboxId}
+          role="listbox"
+          className="absolute top-[calc(100%+8px)] left-0 right-0 bg-[#12121d] border border-white/8 rounded-[3px] z-200 shadow-[0_24px_60px_rgba(0,0,0,0.7)] overflow-hidden animate-fade-up [animation-duration:0.2s] list-none"
+        >
           {error ? (
             <li className="px-4 py-3 text-[13px] text-fg-muted">Search failed — try again.</li>
           ) : results.length === 0 ? (
             !loading && <li className="px-4 py-3 text-[13px] text-fg-muted">No results.</li>
           ) : (
-            results.map((item) => (
+            results.map((item, idx) => (
               <li
                 key={item.id}
+                id={`search-result-${item.id}`}
+                role="option"
+                aria-selected={idx === highlight}
+                onMouseEnter={() => setHighlight(idx)}
                 onMouseDown={() => select(item)}
-                className="flex items-center gap-3.5 px-4 py-3 cursor-pointer transition-colors duration-150 border-b border-white/5 last:border-b-0 hover:bg-white/5"
+                className={`flex items-center gap-3.5 px-4 py-3 cursor-pointer transition-colors duration-150 border-b border-white/5 last:border-b-0 ${
+                  idx === highlight ? 'bg-white/5' : ''
+                }`}
               >
                 {IMG.thumb(item.poster_path) ? (
                   <img

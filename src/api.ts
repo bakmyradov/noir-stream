@@ -8,6 +8,8 @@ import type {
 const KEY = import.meta.env.VITE_TMDB_API_KEY as string | undefined
 const BASE = 'https://api.themoviedb.org/3'
 
+export const TMDB_KEY_PRESENT = !!KEY
+
 if (!KEY) {
   // Surfacing this at module load makes the misconfiguration obvious instead of failing
   // every request with an opaque 401.

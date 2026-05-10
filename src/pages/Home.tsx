@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import LogoMark from '../components/LogoMark'
-import { getTrending, IMG } from '../api'
+import { getTrending, IMG, TMDB_KEY_PRESENT } from '../api'
 import type { MediaSummary } from '../types'
 
 export default function Home() {
@@ -10,6 +10,7 @@ export default function Home() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    if (!TMDB_KEY_PRESENT) return
     const controller = new AbortController()
     getTrending(controller.signal)
       .then(setFeatured)
@@ -43,6 +44,15 @@ export default function Home() {
           Search for any film or series to begin
         </p>
 
+        {!TMDB_KEY_PRESENT && (
+          <div
+            role="alert"
+            className="mb-5 px-4 py-2.5 rounded-[2px] border border-red-500/30 bg-red-500/5 text-[12px] tracking-[0.04em] text-red-300/90"
+          >
+            Missing <code className="font-mono">VITE_TMDB_API_KEY</code> — search and metadata are unavailable.
+          </div>
+        )}
+
         <SearchBar autoFocus />
 
         {featured.length > 0 && (
@@ -53,14 +63,16 @@ export default function Home() {
                 const title = item.media_type === 'movie' ? item.title : item.name
                 const poster = IMG.poster(item.poster_path)
                 return (
-                  <div
+                  <button
                     key={item.id}
-                    className="relative w-[72px] h-[104px] rounded-[2px] overflow-hidden cursor-pointer bg-bg3 border border-white/6 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.6)]"
+                    type="button"
                     onClick={() => openItem(item)}
                     title={title}
+                    aria-label={title}
+                    className="relative w-[72px] h-[104px] rounded-[2px] overflow-hidden cursor-pointer bg-bg3 border border-white/6 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.6)] focus-visible:outline-none focus-visible:border-accent p-0 text-left"
                   >
                     {poster ? (
-                      <img src={poster} alt={title} className="size-full object-cover saturate-[0.7]" />
+                      <img src={poster} alt="" className="size-full object-cover saturate-[0.7]" />
                     ) : (
                       <div className="size-full flex items-center justify-center font-heading text-2xl text-fg-muted">
                         {(title || '?')[0]}
@@ -69,7 +81,7 @@ export default function Home() {
                     <div className="absolute inset-x-0 bottom-0 pt-5 px-1.5 pb-1.5 bg-linear-to-b from-transparent to-black/85 text-[8px] tracking-[0.04em] text-fg/70 text-center leading-tight font-sans">
                       {title}
                     </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
