@@ -4,8 +4,10 @@ import { getMovie, IMG } from '../api'
 import Topbar from '../components/Topbar'
 import SourceSelector from '../components/SourceSelector'
 import DetailHero from '../components/DetailHero'
+import HeartButton from '../components/HeartButton'
 import { DEFAULT_SOURCE } from '../sources'
 import { useEmbedFallback } from '../hooks/useEmbedFallback'
+import { useLibrary } from '../library/useLibrary'
 import type { MovieDetails } from '../types'
 
 export default function MoviePage() {
@@ -14,6 +16,7 @@ export default function MoviePage() {
   const [movie, setMovie] = useState<MovieDetails | null>(null)
   const [playing, setPlaying] = useState(false)
   const [sourceId, setSourceId] = useState(DEFAULT_SOURCE)
+  const { recordOpen } = useLibrary()
 
   useEffect(() => {
     if (!id) return
@@ -124,15 +127,33 @@ export default function MoviePage() {
               {movie.overview}
             </p>
           )}
-          <button
-            onClick={() => setPlaying(true)}
-            className="inline-flex items-center gap-2.5 bg-accent text-bg-[#080810] border-none rounded-[2px] px-9 py-3 font-sans text-xs font-medium tracking-widest uppercase cursor-pointer mt-6 self-start transition-[filter,transform] duration-200 hover:brightness-110 hover:-translate-y-px"
-          >
-            <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor">
-              <path d="M1 1l8 5L1 11V1z"/>
-            </svg>
-            {playing ? 'Now Playing' : 'Play Now'}
-          </button>
+          <div className="flex items-center gap-2.5 self-start">
+            <button
+              onClick={() => {
+                setPlaying(true)
+                void recordOpen({
+                  tmdb_id: Number(id),
+                  media_type: 'movie',
+                  title: movie.title,
+                  poster_path: movie.poster_path,
+                })
+              }}
+              className="inline-flex items-center gap-2.5 bg-accent text-bg-[#080810] border-none rounded-[2px] px-9 py-3 font-sans text-xs font-medium tracking-widest uppercase cursor-pointer mt-6 self-start transition-[filter,transform] duration-200 hover:brightness-110 hover:-translate-y-px"
+            >
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor">
+                <path d="M1 1l8 5L1 11V1z"/>
+              </svg>
+              {playing ? 'Now Playing' : 'Play Now'}
+            </button>
+            <HeartButton
+              snapshot={{
+                tmdb_id: Number(id),
+                media_type: 'movie',
+                title: movie.title,
+                poster_path: movie.poster_path,
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

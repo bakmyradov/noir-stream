@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import LogoMark from './LogoMark'
 import SearchBar from './SearchBar'
+import UserMenu from './UserMenu'
 
 export default function Topbar() {
   const navigate = useNavigate()
@@ -28,6 +29,7 @@ export default function Topbar() {
         </span>
       </button>
       <SearchBar variant="topbar" />
+      <UserMenu />
     </nav>
   )
 }

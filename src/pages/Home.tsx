@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import LogoMark from '../components/LogoMark'
+import UserMenu from '../components/UserMenu'
+import ContinueWatchingRow from '../components/ContinueWatchingRow'
 import { getTrending, IMG, TMDB_KEY_PRESENT } from '../api'
 import type { MediaSummary } from '../types'
 
@@ -23,8 +25,11 @@ export default function Home() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-svh p-5 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,#1a1428_0%,var(--color-bg)_70%)] animate-fade-in">
-      <div className="text-center w-full max-w-[580px] flex flex-col items-center">
+    <div className="relative flex items-center justify-center min-h-svh p-5 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,#1a1428_0%,var(--color-bg)_70%)] animate-fade-in">
+      <div className="absolute top-5 right-5 z-50 flex">
+        <UserMenu />
+      </div>
+      <div className="text-center w-full max-w-[680px] flex flex-col items-center">
         <div className="flex flex-col items-center gap-5 mb-[52px]">
           <div className="text-accent animate-fade-up [animation-delay:0.1s]">
             <LogoMark style="aperture" size={52} />
@@ -54,6 +59,8 @@ export default function Home() {
         )}
 
         <SearchBar autoFocus />
+
+        <ContinueWatchingRow />
 
         {featured.length > 0 && (
           <div className="mt-[52px] flex flex-col items-center gap-4 animate-fade-up [animation-delay:1.4s] relative z-0">

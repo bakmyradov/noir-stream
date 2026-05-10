@@ -25,6 +25,7 @@ export default function SearchBar({ autoFocus = false, variant = 'hero' }: Searc
   useEffect(() => {
     const q = query.trim()
     if (q.length < MIN_QUERY_LENGTH) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([])
       setOpen(false)
       setError(false)

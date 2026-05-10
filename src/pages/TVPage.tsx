@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { getTVShow, getSeason, IMG } from '../api'
 import Topbar from '../components/Topbar'
 import SourceSelector from '../components/SourceSelector'
 import DetailHero from '../components/DetailHero'
+import HeartButton from '../components/HeartButton'
 import { DEFAULT_SOURCE } from '../sources'
 import { useEmbedFallback } from '../hooks/useEmbedFallback'
+import { useLibrary } from '../library/useLibrary'
 import type { ActiveEpisode, Episode, SeasonSummary, TVDetails } from '../types'
 
 export default function TVPage() {
@@ -20,6 +22,9 @@ export default function TVPage() {
   const [episodesError, setEpisodesError] = useState(false)
   const [episodesRetry, setEpisodesRetry] = useState(0)
   const [sourceId, setSourceId] = useState(DEFAULT_SOURCE)
+  const { recordEpisode } = useLibrary()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const pendingPreselectRef = useRef<{ s: number; e: number } | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -27,19 +32,33 @@ export default function TVPage() {
     setActiveEp(null)
     setShow(null)
     setSourceId(DEFAULT_SOURCE)
+
+    const sParam = Number(searchParams.get('s'))
+    const eParam = Number(searchParams.get('e'))
+    pendingPreselectRef.current =
+      Number.isFinite(sParam) && sParam > 0 && Number.isFinite(eParam) && eParam > 0
+        ? { s: sParam, e: eParam }
+        : null
+
     const controller = new AbortController()
     getTVShow(id, controller.signal)
       .then((data) => {
         setShow(data)
         const real = (data.seasons ?? []).filter((s) => s.season_number > 0)
         setSeasons(real)
-        if (real.length > 0) setActiveSeason(real[0]!.season_number)
+        const preselect = pendingPreselectRef.current
+        const initialSeason =
+          preselect && real.some((s) => s.season_number === preselect.s)
+            ? preselect.s
+            : real[0]?.season_number ?? 1
+        setActiveSeason(initialSeason)
       })
       .catch((e) => {
         if ((e as Error).name === 'AbortError') return
         navigate('/')
       })
     return () => controller.abort()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, navigate])
 
   useEffect(() => {
@@ -49,7 +68,18 @@ export default function TVPage() {
     setEpisodesError(false)
     const controller = new AbortController()
     getSeason(id, activeSeason, controller.signal)
-      .then((data) => setEpisodes(data.episodes ?? []))
+      .then((data) => {
+        const eps = data.episodes ?? []
+        setEpisodes(eps)
+        const preselect = pendingPreselectRef.current
+        if (preselect && preselect.s === activeSeason) {
+          const match = eps.find((ep) => ep.episode_number === preselect.e)
+          if (match) {
+            setActiveEp({ season: match.season_number, episode: match.episode_number, name: match.name })
+          }
+          pendingPreselectRef.current = null
+        }
+      })
       .catch((e) => {
         if ((e as Error).name === 'AbortError') return
         setEpisodes([])
@@ -62,6 +92,25 @@ export default function TVPage() {
   function playEpisode(ep: Episode) {
     setActiveEp({ season: ep.season_number, episode: ep.episode_number, name: ep.name })
     window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (id && show) {
+      void recordEpisode(
+        {
+          tmdb_id: Number(id),
+          media_type: 'tv',
+          title: show.name,
+          poster_path: show.poster_path,
+        },
+        ep.season_number,
+        ep.episode_number,
+      )
+    }
+    // Clear ?s=&e= query params once the user navigates around inside the page
+    if (searchParams.has('s') || searchParams.has('e')) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('s')
+      next.delete('e')
+      setSearchParams(next, { replace: true })
+    }
   }
 
   const embedKey = activeEp ? `tv-${id}-${activeEp.season}-${activeEp.episode}` : `tv-${id}-idle`
@@ -163,6 +212,14 @@ export default function TVPage() {
               ▶ S{activeEp.season} E{activeEp.episode} — {activeEp.name}
             </p>
           )}
+          <HeartButton
+            snapshot={{
+              tmdb_id: Number(id),
+              media_type: 'tv',
+              title: show.name,
+              poster_path: show.poster_path,
+            }}
+          />
         </div>
       </div>
 
