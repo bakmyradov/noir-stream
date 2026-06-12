@@ -22,6 +22,8 @@ export interface LibraryContextValue {
     season: number,
     episode: number,
   ) => Promise<void>
+  removeFromHistory: (tmdbId: number, mediaType: MediaType) => Promise<void>
+  clearHistory: () => Promise<void>
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -174,6 +176,65 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       }
       upsertLocal(row)
       await upsertRemote(row)
+    },
+    async removeFromHistory(tmdbId, mediaType) {
+      if (!user) return
+      const existing = indexed.get(rowKey(tmdbId, mediaType))
+      if (!existing?.last_opened_at) return
+
+      // Favorited rows stay in the watchlist — only wipe the watch progress
+      if (existing.favorited) {
+        const row: LibraryRow = {
+          ...existing,
+          last_opened_at: null,
+          last_season: null,
+          last_episode: null,
+        }
+        upsertLocal(row)
+        await upsertRemote(row)
+        return
+      }
+
+      removeLocal(tmdbId, mediaType)
+      const { error } = await supabase
+        .from('library')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('tmdb_id', tmdbId)
+        .eq('media_type', mediaType)
+      if (error) {
+        console.error('library delete failed', error)
+        upsertLocal(existing)
+      }
+    },
+    async clearHistory() {
+      if (!user) return
+      const prev = items
+      setItems((cur) =>
+        cur
+          .filter((r) => r.favorited)
+          .map((r) =>
+            r.last_opened_at
+              ? { ...r, last_opened_at: null, last_season: null, last_episode: null }
+              : r,
+          ),
+      )
+      const [del, upd] = await Promise.all([
+        supabase
+          .from('library')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('favorited', false),
+        supabase
+          .from('library')
+          .update({ last_opened_at: null, last_season: null, last_episode: null })
+          .eq('user_id', user.id)
+          .eq('favorited', true),
+      ])
+      if (del.error || upd.error) {
+        console.error('library clear history failed', del.error ?? upd.error)
+        setItems(prev)
+      }
     },
   }
 

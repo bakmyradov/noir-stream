@@ -90,6 +90,14 @@
   }
 }
 
+/* iOS Safari zooms the page when a focused input's font-size is under 16px.
+   Unlayered so it outranks Tailwind's layered text-size utilities on mobile. */
+@media (max-width: 600px) {
+  input, textarea, select {
+    font-size: 16px;
+  }
+}
+
 /* Component-level CSS that is awkward to express as utilities:
    - The episode-card play indicator uses two pseudo-elements (disc + triangle)
      and four interaction states. Encoding all of that with Tailwind variants

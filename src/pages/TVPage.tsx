@@ -141,7 +141,8 @@ export default function TVPage() {
 
       {activeEp && embedUrl && (
         <>
-          <div className="w-full aspect-video bg-black overflow-hidden">
+          {/* Clear the fixed Topbar so the embed's own top controls stay clickable */}
+          <div className="w-full aspect-video bg-black overflow-hidden mt-[60px] max-[600px]:mt-[52px]">
             {/* Cross-origin iframes don't reliably emit `error`; the watchdog
                 inside useEmbedFallback is the primary fallback path. */}
             <iframe
