@@ -7,11 +7,13 @@ const MIN_QUERY_LENGTH = 2
 
 interface SearchBarProps {
   autoFocus?: boolean
+  /** Stretch to fill the row instead of capping at 360px (expanded topbar mode). */
+  fullWidth?: boolean
   /** When rendered inside the topbar the input + icon get tighter spacing. */
   variant?: 'hero' | 'topbar'
 }
 
-export default function SearchBar({ autoFocus = false, variant = 'hero' }: SearchBarProps) {
+export default function SearchBar({ autoFocus = false, fullWidth = false, variant = 'hero' }: SearchBarProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<MediaSummary[]>([])
   const [loading, setLoading] = useState(false)
@@ -103,7 +105,7 @@ export default function SearchBar({ autoFocus = false, variant = 'hero' }: Searc
 
   const isTopbar = variant === 'topbar'
   const wrapperClasses = isTopbar
-    ? 'relative w-full max-w-[360px] flex-1 z-[100]'
+    ? `relative w-full flex-1 z-[100] ${fullWidth ? '' : 'max-w-[360px]'}`
     : 'relative w-full z-[100] animate-fade-up [animation-delay:0.75s]'
 
   const iconLeft = isTopbar ? 'left-2.5' : 'left-[18px]'

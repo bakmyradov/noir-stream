@@ -135,7 +135,7 @@ export default function TVPage() {
 
   return (
     <div className="min-h-svh bg-bg animate-fade-in">
-      <Topbar />
+      <Topbar collapsibleSearch />
 
       {!activeEp && <DetailHero backdropPath={show.backdrop_path} />}
 

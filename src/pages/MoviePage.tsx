@@ -55,7 +55,7 @@ export default function MoviePage() {
 
   return (
     <div className="min-h-svh bg-bg animate-fade-in">
-      <Topbar />
+      <Topbar collapsibleSearch />
 
       {!playing && <DetailHero backdropPath={movie.backdrop_path} />}
 
