@@ -5,8 +5,8 @@ export const SOURCES: readonly Source[] = [
     id: 'videasy',
     name: 'Videasy',
     badge: '4K',
-    movie: (id) => `https://player.videasy.net/movie/${id}`,
-    tv: (id, s, e) => `https://player.videasy.net/tv/${id}/${s}/${e}`,
+    movie: (id) => `https://player.videasy.to/movie/${id}`,
+    tv: (id, s, e) => `https://player.videasy.to/tv/${id}/${s}/${e}`,
   },
   {
     id: 'vidfast',
@@ -19,8 +19,8 @@ export const SOURCES: readonly Source[] = [
     id: 'vidsrc',
     name: 'VidSrc',
     badge: '1080p',
-    movie: (id) => `https://vidsrc-embed.ru/embed/movie?tmdb=${id}`,
-    tv: (id, s, e) => `https://vidsrc-embed.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+    movie: (id) => `https://vsembed.ru/embed/movie?tmdb=${id}`,
+    tv: (id, s, e) => `https://vsembed.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
   },
   {
     id: 'vidlink',
@@ -43,9 +43,9 @@ export const DEFAULT_SOURCE = 'videasy'
 // Origins of the player iframes — used by the SW to scope its cross-origin
 // navigation block so it only fires for redirects coming from a player iframe.
 export const SOURCE_ORIGINS: readonly string[] = [
-  'https://player.videasy.net',
+  'https://player.videasy.to',
   'https://vidfast.pro',
-  'https://vidsrc-embed.ru',
+  'https://vsembed.ru',
   'https://vidlink.pro',
   'https://multiembed.mov',
 ]
