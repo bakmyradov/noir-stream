@@ -12,8 +12,8 @@ export const SOURCES: readonly Source[] = [
     id: 'vidfast',
     name: 'VidFast',
     badge: '4K',
-    movie: (id) => `https://vidfast.pro/movie/${id}`,
-    tv: (id, s, e) => `https://vidfast.pro/tv/${id}/${s}/${e}`,
+    movie: (id) => `https://vidfast.vc/movie/${id}`,
+    tv: (id, s, e) => `https://vidfast.vc/tv/${id}/${s}/${e}`,
   },
   {
     id: 'vidsrc',
@@ -44,6 +44,7 @@ export const DEFAULT_SOURCE = 'videasy'
 // navigation block so it only fires for redirects coming from a player iframe.
 export const SOURCE_ORIGINS: readonly string[] = [
   'https://player.videasy.to',
+  'https://vidfast.vc',
   'https://vidfast.pro',
   'https://vsembed.ru',
   'https://vidlink.pro',
