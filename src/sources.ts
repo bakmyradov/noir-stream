@@ -49,4 +49,6 @@ export const SOURCE_ORIGINS: readonly string[] = [
   'https://vsembed.ru',
   'https://vidlink.pro',
   'https://multiembed.mov',
+  // multiembed.mov redirects the iframe here; the player page itself lives on this origin.
+  'https://streamingnow.mov',
 ]
