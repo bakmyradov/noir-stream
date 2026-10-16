@@ -154,7 +154,6 @@ export default function TVPage() {
               key={`${id}-${activeEp.season}-${activeEp.episode}-${sourceId}`}
               src={embedUrl}
               allowFullScreen
-              referrerPolicy="no-referrer"
               title={`${show.name} S${activeEp.season}E${activeEp.episode}`}
               onLoad={onIframeLoad}
               onError={onIframeError}

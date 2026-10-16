@@ -76,7 +76,6 @@ export default function MoviePage() {
               key={`${id}-${sourceId}`}
               src={embedUrl}
               allowFullScreen
-              referrerPolicy="no-referrer"
               title={movie.title}
               onLoad={onIframeLoad}
               onError={onIframeError}
