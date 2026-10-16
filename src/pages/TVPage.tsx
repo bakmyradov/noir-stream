@@ -4,6 +4,10 @@ import { getTVShow, getSeason, IMG } from '../api'
 import Topbar from '../components/Topbar'
 import SourceSelector from '../components/SourceSelector'
 import DetailHero from '../components/DetailHero'
+import DetailSection from '../components/DetailSection'
+import CastRow from '../components/CastRow'
+import { GenreLinks, PeopleLine } from '../components/CreditLinks'
+import { PosterRow } from '../components/PosterCard'
 import HeartButton from '../components/HeartButton'
 import { DEFAULT_SOURCE } from '../sources'
 import { useEmbedFallback } from '../hooks/useEmbedFallback'
@@ -91,7 +95,8 @@ export default function TVPage() {
 
   function playEpisode(ep: Episode) {
     setActiveEp({ season: ep.season_number, episode: ep.episode_number, name: ep.name })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // The page scrolls inside <body>, not the window (see ScrollManager in App.tsx).
+    document.body.scrollTo({ top: 0, behavior: 'smooth' })
     if (id && show) {
       void recordEpisode(
         {
@@ -194,20 +199,14 @@ export default function TVPage() {
                 {rating}
               </span>
             )}
-            {show.genres?.map((g) => (
-              <span
-                key={g.id}
-                className="text-[10px] tracking-[0.12em] uppercase border border-white/15 px-2.5 py-0.5 rounded-[2px] text-fg-muted font-normal"
-              >
-                {g.name}
-              </span>
-            ))}
+            <GenreLinks genres={show.genres} type="tv" />
           </div>
           {show.overview && (
             <p className="text-sm leading-[1.75] text-fg-muted max-w-[560px] font-light mt-4">
               {show.overview}
             </p>
           )}
+          <PeopleLine label="Created by" people={show.created_by ?? []} />
           {activeEp && (
             <p className="text-[11px] text-accent mt-3 tracking-[0.08em] uppercase">
               ▶ S{activeEp.season} E{activeEp.episode} — {activeEp.name}
@@ -307,6 +306,18 @@ export default function TVPage() {
           </div>
         )}
       </div>
+
+      {(show.credits?.cast.length ?? 0) > 0 && (
+        <DetailSection label="Cast">
+          <CastRow cast={show.credits?.cast ?? []} />
+        </DetailSection>
+      )}
+
+      {(show.recommendations?.length ?? 0) > 0 && (
+        <DetailSection label="More like this">
+          <PosterRow label="More like this" items={show.recommendations ?? []} />
+        </DetailSection>
+      )}
     </div>
   )
 }

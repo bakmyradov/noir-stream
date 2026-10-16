@@ -4,6 +4,10 @@ import { getMovie, IMG } from '../api'
 import Topbar from '../components/Topbar'
 import SourceSelector from '../components/SourceSelector'
 import DetailHero from '../components/DetailHero'
+import DetailSection from '../components/DetailSection'
+import CastRow from '../components/CastRow'
+import { GenreLinks, PeopleLine } from '../components/CreditLinks'
+import { PosterRow } from '../components/PosterCard'
 import HeartButton from '../components/HeartButton'
 import { DEFAULT_SOURCE } from '../sources'
 import { useEmbedFallback } from '../hooks/useEmbedFallback'
@@ -52,6 +56,9 @@ export default function MoviePage() {
   const year = (movie.release_date || '').slice(0, 4)
   const rating = movie.vote_average ? movie.vote_average.toFixed(1) : null
   const embedUrl = source.movie(id)
+  const directors = (movie.credits?.crew ?? []).filter((c) => c.job === 'Director')
+  const cast = movie.credits?.cast ?? []
+  const recommendations = movie.recommendations ?? []
 
   return (
     <div className="min-h-svh bg-bg animate-fade-in">
@@ -114,20 +121,14 @@ export default function MoviePage() {
                 {rating}
               </span>
             )}
-            {movie.genres?.map((g) => (
-              <span
-                key={g.id}
-                className="text-[10px] tracking-[0.12em] uppercase border border-white/15 px-2.5 py-0.5 rounded-[2px] text-fg-muted font-normal"
-              >
-                {g.name}
-              </span>
-            ))}
+            <GenreLinks genres={movie.genres} type="movie" />
           </div>
           {movie.overview && (
             <p className="text-sm leading-[1.75] text-fg-muted max-w-[560px] font-light mt-4">
               {movie.overview}
             </p>
           )}
+          <PeopleLine label="Directed by" people={directors} />
           <div className="flex items-center gap-2.5 self-start">
             <button
               onClick={() => {
@@ -157,6 +158,18 @@ export default function MoviePage() {
           </div>
         </div>
       </div>
+
+      {cast.length > 0 && (
+        <DetailSection label="Cast">
+          <CastRow cast={cast} />
+        </DetailSection>
+      )}
+
+      {recommendations.length > 0 && (
+        <DetailSection label="More like this">
+          <PosterRow label="More like this" items={recommendations} />
+        </DetailSection>
+      )}
     </div>
   )
 }

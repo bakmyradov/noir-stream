@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import PosterCard from '../components/PosterCard'
 import Topbar from '../components/Topbar'
 import { useLibrary } from '../library/useLibrary'
 import { IMG } from '../api'
@@ -21,7 +21,6 @@ function hrefFor(it: LibraryRow): string {
 }
 
 function Card({ it, onRemove }: { it: LibraryRow; onRemove?: () => void }) {
-  const poster = IMG.poster(it.poster_path)
   const label = it.title ?? `${it.media_type} ${it.tmdb_id}`
   const subtitle =
     it.media_type === 'tv' && it.last_season && it.last_episode
@@ -30,42 +29,25 @@ function Card({ it, onRemove }: { it: LibraryRow; onRemove?: () => void }) {
         ? 'TV Series'
         : 'Movie'
   return (
-    <Link
-      to={hrefFor(it)}
-      title={label}
-      className="group flex flex-col gap-2 cursor-pointer"
-    >
-      <div className="relative aspect-[2/3] rounded-[2px] overflow-hidden bg-bg3 border border-white/6 transition-[transform,box-shadow,border-color] duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_12px_30px_rgba(0,0,0,0.6)] group-hover:border-white/15">
-        {poster ? (
-          <img src={poster} alt="" className="size-full object-cover saturate-[0.75] group-hover:saturate-100 transition-[filter] duration-300" />
-        ) : (
-          <div className="size-full flex items-center justify-center font-heading text-3xl text-fg-muted">
-            {(label || '?')[0]}
-          </div>
-        )}
-        {onRemove && (
-          <button
-            type="button"
-            aria-label={`Remove ${label} from history`}
-            title="Remove from history"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onRemove()
-            }}
-            className="absolute top-1.5 right-1.5 z-10 flex size-7 items-center justify-center rounded-[2px] border border-white/15 bg-black/65 text-fg-muted opacity-0 transition-[opacity,color,border-color,background] duration-200 cursor-pointer group-hover:opacity-100 focus-visible:opacity-100 max-[600px]:opacity-100 hover:border-white/40 hover:bg-black/85 hover:text-fg"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-      <div className="flex flex-col px-0.5">
-        <span className="text-[13px] text-fg leading-tight font-normal line-clamp-2">{label}</span>
-        <span className="text-[10px] tracking-[0.08em] uppercase text-accent mt-0.5">{subtitle}</span>
-      </div>
-    </Link>
+    <PosterCard to={hrefFor(it)} title={label} imageUrl={IMG.poster(it.poster_path)} subtitle={subtitle}>
+      {onRemove && (
+        <button
+          type="button"
+          aria-label={`Remove ${label} from history`}
+          title="Remove from history"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onRemove()
+          }}
+          className="absolute top-1.5 right-1.5 z-10 flex size-7 items-center justify-center rounded-[2px] border border-white/15 bg-black/65 text-fg-muted opacity-0 transition-[opacity,color,border-color,background] duration-200 cursor-pointer group-hover:opacity-100 focus-visible:opacity-100 max-[600px]:opacity-100 hover:border-white/40 hover:bg-black/85 hover:text-fg"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+    </PosterCard>
   )
 }
 

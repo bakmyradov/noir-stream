@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import LogoMark from '../components/LogoMark'
 import UserMenu from '../components/UserMenu'
@@ -46,7 +46,7 @@ export default function Home() {
         </div>
 
         <p className="text-[13px] tracking-[0.04em] text-fg-muted mb-7 font-light animate-fade-up [animation-delay:0.6s]">
-          Search for any film or series to begin
+          Search for any film, series or person to begin
         </p>
 
         {!TMDB_KEY_PRESENT && (
@@ -58,7 +58,14 @@ export default function Home() {
           </div>
         )}
 
-        <SearchBar autoFocus />
+        <SearchBar autoFocus shortcut />
+
+        <Link
+          to="/discover"
+          className="mt-4 text-[11px] tracking-[0.08em] text-fg-muted hover:text-accent transition-colors duration-200 animate-fade-up [animation-delay:0.9s]"
+        >
+          or browse by genre, year &amp; more →
+        </Link>
 
         <ContinueWatchingRow />
 

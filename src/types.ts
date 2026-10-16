@@ -13,6 +13,8 @@ export interface MovieSummary {
   backdrop_path: string | null
   release_date?: string
   vote_average?: number
+  vote_count?: number
+  genre_ids?: number[]
 }
 
 export interface TVSummary {
@@ -23,9 +25,48 @@ export interface TVSummary {
   backdrop_path: string | null
   first_air_date?: string
   vote_average?: number
+  vote_count?: number
+  genre_ids?: number[]
 }
 
 export type MediaSummary = MovieSummary | TVSummary
+
+export interface PersonSummary {
+  id: number
+  media_type: 'person'
+  name: string
+  profile_path: string | null
+  known_for_department?: string
+  known_for?: MediaSummary[]
+}
+
+export type SearchResult = MediaSummary | PersonSummary
+
+export interface Paged<T> {
+  page: number
+  total_pages: number
+  total_results: number
+  results: T[]
+}
+
+export interface CastMember {
+  id: number
+  name: string
+  character?: string
+  profile_path: string | null
+}
+
+export interface CrewMember {
+  id: number
+  name: string
+  job: string
+  profile_path: string | null
+}
+
+export interface Credits {
+  cast: CastMember[]
+  crew: CrewMember[]
+}
 
 export interface MovieDetails {
   id: number
@@ -37,6 +78,8 @@ export interface MovieDetails {
   runtime?: number
   vote_average?: number
   genres?: Genre[]
+  credits?: Credits
+  recommendations?: MediaSummary[]
 }
 
 export interface SeasonSummary {
@@ -57,6 +100,56 @@ export interface TVDetails {
   vote_average?: number
   genres?: Genre[]
   seasons?: SeasonSummary[]
+  created_by?: { id: number; name: string }[]
+  credits?: Credits
+  recommendations?: MediaSummary[]
+}
+
+/** One entry of a person's filmography: a title plus their role on it. */
+export type PersonCredit = MediaSummary & {
+  character?: string
+  job?: string
+  department?: string
+}
+
+export interface PersonDetails {
+  id: number
+  name: string
+  biography?: string
+  profile_path: string | null
+  birthday?: string | null
+  deathday?: string | null
+  place_of_birth?: string | null
+  known_for_department?: string
+  combined_credits?: {
+    cast: PersonCredit[]
+    crew: PersonCredit[]
+  }
+}
+
+/** A keyword or company picked as a discover filter. */
+export interface NamedEntity {
+  id: number
+  name: string
+  /** Extra text shown in pickers to tell same-named entries apart. */
+  hint?: string
+}
+
+export type DiscoverSort = 'popular' | 'rating' | 'newest' | 'oldest'
+
+export interface DiscoverFilters {
+  genres: number[]
+  yearFrom?: number
+  yearTo?: number
+  minRating?: number
+  runtimeMin?: number
+  runtimeMax?: number
+  language?: string
+  sort: DiscoverSort
+  keywords: number[]
+  studios: number[]
+  /** TV only. */
+  network?: number
 }
 
 export interface Episode {
