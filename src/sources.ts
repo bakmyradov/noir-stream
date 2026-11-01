@@ -5,8 +5,8 @@ export const SOURCES: readonly Source[] = [
     id: 'videasy',
     name: 'Videasy',
     badge: '4K',
-    movie: (id) => `https://player.videasy.to/movie/${id}`,
-    tv: (id, s, e) => `https://player.videasy.to/tv/${id}/${s}/${e}`,
+    movie: (id) => `https://player.videasy.ws/movie/${id}`,
+    tv: (id, s, e) => `https://player.videasy.ws/tv/${id}/${s}/${e}`,
   },
   {
     id: 'vidfast',
