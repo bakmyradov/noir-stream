@@ -16,7 +16,9 @@ interface UseEmbedFallbackResult {
 // Tracks whether the current iframe loaded; if it doesn't fire `load` within
 // LOAD_TIMEOUT_MS, or it errors, we rotate to the next source automatically.
 // `embedKey` should change whenever the underlying media (movie id, episode)
-// changes so we restart the watchdog and the tried-source set.
+// changes so we restart the watchdog and the tried-source set. `enabled`
+// should be true only while the iframe is rendered; otherwise the watchdog
+// would fire on the details page before the user presses Play.
 //
 // Note: cross-origin iframes don't reliably emit `error`, so the timeout is the
 // real fallback path — `onIframeError` is best-effort only.
@@ -24,6 +26,7 @@ export function useEmbedFallback(
   active: string,
   setActive: (id: string) => void,
   embedKey: string,
+  enabled: boolean,
 ): UseEmbedFallbackResult {
   const [tried, setTried] = useState<Set<string>>(() => new Set([active]))
   const [lastKey, setLastKey] = useState(embedKey)
@@ -58,9 +61,10 @@ export function useEmbedFallback(
   useEffect(() => {
     loadedRef.current = false
     clearTimer()
+    if (!enabled) return
     timerRef.current = window.setTimeout(advance, LOAD_TIMEOUT_MS)
     return clearTimer
-  }, [embedKey, active, advance])
+  }, [embedKey, active, advance, enabled])
 
   const reset = useCallback(() => {
     setTried(new Set([active]))

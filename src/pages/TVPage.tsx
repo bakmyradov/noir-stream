@@ -123,6 +123,7 @@ export default function TVPage() {
     sourceId,
     setSourceId,
     embedKey,
+    activeEp !== null,
   )
 
   if (!id) return null

@@ -42,6 +42,7 @@ export default function MoviePage() {
     sourceId,
     setSourceId,
     `movie-${id}`,
+    playing,
   )
 
   if (!id) return null

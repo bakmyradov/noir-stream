@@ -5,8 +5,8 @@ export const SOURCES: readonly Source[] = [
     id: 'videasy',
     name: 'Videasy',
     badge: '4K',
-    movie: (id) => `https://player.videasy.ws/movie/${id}`,
-    tv: (id, s, e) => `https://player.videasy.ws/tv/${id}/${s}/${e}`,
+    movie: (id) => `https://player.videasy.ws/embed/movie/${id}`,
+    tv: (id, s, e) => `https://player.videasy.ws/embed/tv/${id}/${s}/${e}`,
   },
   {
     id: 'vidfast',
@@ -43,7 +43,7 @@ export const DEFAULT_SOURCE = 'videasy'
 // Origins of the player iframes — used by the SW to scope its cross-origin
 // navigation block so it only fires for redirects coming from a player iframe.
 export const SOURCE_ORIGINS: readonly string[] = [
-  'https://player.videasy.to',
+  'https://player.videasy.ws',
   'https://vidfast.vc',
   'https://vidfast.pro',
   'https://vsembed.ru',
