@@ -2,18 +2,18 @@ import type { Source } from './types'
 
 export const SOURCES: readonly Source[] = [
   {
-    id: 'videasy',
-    name: 'Videasy',
-    badge: '4K',
-    movie: (id) => `https://player.videasy.ws/embed/movie/${id}`,
-    tv: (id, s, e) => `https://player.videasy.ws/embed/tv/${id}/${s}/${e}`,
-  },
-  {
     id: 'vidfast',
     name: 'VidFast',
     badge: '4K',
     movie: (id) => `https://vidfast.vc/movie/${id}`,
     tv: (id, s, e) => `https://vidfast.vc/tv/${id}/${s}/${e}`,
+  },
+  {
+    id: 'videasy',
+    name: 'Videasy',
+    badge: '4K',
+    movie: (id) => `https://player.videasy.ws/embed/movie/${id}`,
+    tv: (id, s, e) => `https://player.videasy.ws/embed/tv/${id}/${s}/${e}`,
   },
   {
     id: 'vidsrc',
@@ -38,7 +38,7 @@ export const SOURCES: readonly Source[] = [
   },
 ]
 
-export const DEFAULT_SOURCE = 'videasy'
+export const DEFAULT_SOURCE = 'vidfast'
 
 // Origins of the player iframes — used by the SW to scope its cross-origin
 // navigation block so it only fires for redirects coming from a player iframe.
